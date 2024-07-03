@@ -17,14 +17,15 @@ namespace Backend.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly UserRepository _userRepository;
+        private readonly IUserRepository _userRepository;
 
-        public UserController(UserRepository userRepository)
+        public UserController(IUserRepository userRepository)
         {
             _userRepository = userRepository;
         }
 
         [HttpGet]
+        [Route("getallusers")]
         public async Task<ActionResult<ApiResponse<List<Users>>>> GetAllUsers()
         {
             var users = await _userRepository.GetAllUsers();
@@ -38,6 +39,7 @@ namespace Backend.Controllers
         }
 
         [HttpGet("{id}")]
+        [Route("getuserbyid")]
         public async Task<ActionResult<ApiResponse<Users>>> GetUserById(int id)
         {
             var user = await _userRepository.GetUserByID(id);
@@ -58,7 +60,8 @@ namespace Backend.Controllers
             });
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{name}")]
+        [Route("getuserbyname")]
         public async Task<ActionResult<ApiResponse<Users>>> GetUserByName(string name)
         {
             var user = await _userRepository.GetUserByName(name);
@@ -80,6 +83,7 @@ namespace Backend.Controllers
         }
 
         [HttpPost]
+        [Route("adduser")]
         public async Task<ActionResult<ApiResponse<int>>> CreateUser([FromBody] Users user)
         {
             await _userRepository.CreateUser(user);
@@ -92,6 +96,7 @@ namespace Backend.Controllers
         }
 
         [HttpPut("{id}")]
+        [Route("updateuser")]
         public async Task<ActionResult<ApiResponse<Users>>> UpdateUser(int id, [FromBody] Users user)
         {
             var existingUser = await _userRepository.GetUserByID(id);
@@ -115,6 +120,7 @@ namespace Backend.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Route("deleteuser")]
         public async Task<ActionResult<ApiResponse<bool>>> DeleteUser(int id)
         {
             var existingUser = await _userRepository.GetUserByID(id);
