@@ -1,4 +1,7 @@
 using Backend.Contracts.DatabaseContext;
+using Backend.Middlewares;
+using Backend.Repos.IRepository;
+using Backend.Repos.Repository;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -27,10 +30,18 @@ namespace Backend
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<ApplicationDBContext>(options =>
-            options.UseNpgsql(Configuration.GetConnectionString("")));
-
+            services.AddDbContext<ApplicationDBContext>(options => options.UseNpgsql(Configuration.GetConnectionString("defaultDB")));
             services.AddControllers();
+            services.AddCors(p =>
+            {
+                p.AddDefaultPolicy(options =>
+                {
+                    options.WithOrigins("*").AllowAnyHeader().AllowAnyMethod();
+                });
+            });
+
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<ExceptionMiddleware>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -45,7 +56,11 @@ namespace Backend
 
             app.UseRouting();
 
+            app.UseAuthentication();
+
             app.UseAuthorization();
+
+            app.UseMiddleware<ExceptionMiddleware>();
 
             app.UseEndpoints(endpoints =>
             {
